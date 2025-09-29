@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DV-2027 • Alhijrah Smart Lottery Portal – VIP</title>
+
+  <!-- Fonts + Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&family=Exo+2:wght@400;700&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+  <!-- 3D background (optional visual) -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+
+  <!-- Utils -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.11.6/bundle/libphonenumber-max.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b0f2a; --bg-soft:#0e1333; --gold:#d4af37; --panel:rgba(11,15,42,.62);
+      --stroke:rgba(212,175,55,.38); --ok:#17c964; --warn:#f5a524; --err:#f31260;
+      --glass:rgba(255,255,255,.06); --glass-2:rgba(255,255,255,.12);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Exo 2','Cairo',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#fff;overflow-x:hidden}
+    #bg{position:fixed;inset:0;z-index:-2}
+    .hide{display:none !important}
+    .container{width:min(100%,1100px);margin:0 auto;padding:0 16px}
+    .panel{backdrop-filter:blur(18px);border:1px solid var(--stroke);border-radius:18px;background:var(--panel);box-shadow:0 0 40px rgba(212,175,55,.22)}
+    .hero{margin:44px auto 20px;padding:44px 16px;text-align:center;position:relative;overflow:hidden}
+    .hero:before{content:"";position:absolute;inset:-2px;border-radius:22px;background:linear-gradient(120deg,rgba(212,175,55,.18),rgba(59,130,246,.12));filter:blur(22px);z-index:-1}
+    .hero h1{margin:0 0 8px;font-family:'Montserrat',sans-serif;font-weight:900;letter-spacing:.3px;font-size:clamp(28px,3.2vw,42px);color:var(--gold);text-shadow:0 0 22px rgba(212,175,55,.55)}
+    .hero p{margin:0;color:#e8e8e8;font-weight:600}
+    .buttons{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;border:1px solid var(--gold);color:var(--gold);background:rgba(255,255,255,.06);box-shadow:0 0 10px rgba(212,175,55,.35);cursor:pointer;text-decoration:none;font-weight:800;transition:transform .15s ease, box-shadow .2s}
+    .btn:hover{background:var(--gold);color:#0b0f2a;transform:translateY(-1px)}
+    .btn:active{transform:scale(.98)}
+    .btn.secondary{border-color:#6b7280;color:#e5e7eb}.btn.secondary:hover{background:#e5e7eb;color:#0b0f2a}
+    .btn .ripple{position:absolute;border-radius:50%;transform:scale(0);animation:ripple .6s linear;background:rgba(255,255,255,.4)}
+    @keyframes ripple {to{transform:scale(4);opacity:0}}
+    .badge{padding:4px 8px;border-radius:999px;border:1px dashed var(--gold);color:#fef3c7;font-size:12px}
+    .wizard{padding:16px 14px 22px}
+    .progress{height:12px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin:10px 0 18px;position:relative}
+    .progress>span{display:block;height:100%;width:0%;background:linear-gradient(90deg,#ffe08a,var(--gold))}
+    .steps{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .col-6{grid-column:span 6}.col-12{grid-column:span 12}
+    @media(max-width:860px){.col-6{grid-column:span 12}}
+    label{display:block;font-weight:800;margin-bottom:6px}
+    .ipt,.sel,.txt,.file{width:100%;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.09);color:#fff;outline:none;transition:box-shadow .2s,border-color .2s,transform .15s}
+    .ipt::placeholder,.txt::placeholder{color:#b8c0cc}
+    .ipt:focus,.sel:focus,.txt:focus,.file:focus{border-color:var(--gold);box-shadow:0 0 0 6px rgba(212,175,55,.12), inset 0 0 0 1px rgba(255,255,255,.1)}
+    fieldset.step{opacity:0;transform:translateY(14px);transition:opacity .35s,transform .35s}
+    fieldset.step:not(.hide){opacity:1;transform:none}
+    .inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .err{display:none;color:var(--err);font-size:12px;margin-top:4px}
+    .section-title{font-family:'Montserrat',sans-serif;font-weight:800;letter-spacing:.3px;font-size:22px;margin:22px 0 8px;color:var(--gold);text-shadow:0 0 14px rgba(212,175,55,.5)}
+
+    /* Photo review */
+    .photo-review{margin-top:10px;border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:10px}
+    .photo-grid{display:grid;grid-template-columns:220px 1fr;gap:12px}
+    @media(max-width:720px){.photo-grid{grid-template-columns:1fr}}
+    .photo-box{background:#0f172a;border-radius:12px;display:flex;align-items:center;justify-content:center;min-height:210px;border:1px solid rgba(255,255,255,.12)}
+    .ok-txt{color:var(--ok)} .bad-txt{color:var(--err)}
+
+    /* Review */
+    .review-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .review-card{grid-column:span 12;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:12px}
+    .review-pair{display:grid;grid-template-columns:200px 1fr;gap:8px;padding:6px 8px;border-radius:10px}
+    .review-pair:nth-child(even){background:rgba(255,255,255,.04)}
+    .review-edit{border:1px dashed var(--stroke);padding:6px 10px;border-radius:999px;cursor:pointer}
+
+    /* VIP Client Card */
+    .vip-card{position:relative;overflow:hidden;border-radius:20px;padding:18px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.14)}
+    .vip-card .vip-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .vip-glass-header{position:relative;padding:12px 16px;border-radius:16px;background:linear-gradient(120deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 0 20px rgba(255,255,255,.06)}
+    .vip-brand{font-family:'Montserrat',sans-serif;font-weight:900;letter-spacing:.6px;color:#ffe8a6}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);font-size:12px}
+    .chip.ok{border-color:rgba(23,201,100,.45)}
+    .kv{display:grid;grid-template-columns:200px 1fr;gap:8px;margin:8px 0;text-align:right}
+    .vip-footer{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(255,255,255,.16);display:flex;gap:12px;align-items:center;justify-content:space-between}
+
+    /* QR pulse */
+    .qr-wrap{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center}
+    .qr-pulse{position:absolute;inset:0;border-radius:16px;background:radial-gradient(closest-side, rgba(212,175,55,.20), rgba(212,175,55,0));opacity:0;animation:qrpulse 7s infinite}
+    @keyframes qrpulse{0%{opacity:0}3%{opacity:1}30%{opacity:.25}60%{opacity:0}100%{opacity:0}}
+
+    /* Toast */
+    .toast{position:fixed;bottom:20px;right:20px;min-width:260px;max-width:90vw;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(15,23,42,.92);color:#fff;backdrop-filter:blur(8px);z-index:9999;display:none}
+    .toast.show{display:block}
+
+    /* Social bar */
+    .social-bar{position:fixed;left:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:40}
+    .social-bar a{width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);backdrop-filter:blur(10px);color:#fff}
+    .social-bar a:hover{background:var(--gold);color:#0b0f2a}
+
+    /* Floating Dock */
+    .dock{position:fixed;inset-inline:0;bottom:10px;display:flex;justify-content:center;z-index:50}
+    .dock-inner{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(12px)}
+
+    /* Assistant bubble */
+    .assist{position:fixed;right:14px;bottom:90px;max-width:300px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(10px);font-size:13px}
+    .assist b{color:#ffe8a6}
+    .assist .row{display:flex;gap:8px;align-items:center}
+    .assist .row i{opacity:.8}
+
+    /* Footer (closing) */
+    footer.vip{margin:40px auto 60px}
+    .closing{padding:16px;border-radius:18px;background:linear-gradient(120deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12)}
+    .quote{margin-top:8px;color:#e8e8e8;font-style:italic}
+
+    /* Lite mode */
+    .lite .panel{background:rgba(255,255,255,.05);box-shadow:none}
+    .lite #bg{display:none}
+
+    /* Modal overlay */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:70}
+    .modal{width:min(92vw,560px);background:#0f172a;border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:18px}
+    .modal h3{margin:0 0 10px;color:#fef3c7}
+    .modal p{margin:6px 0;color:#e5e7eb}
+    .modal .kv{grid-template-columns:140px 1fr}
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+
+  <!-- Social Bar -->
+  <div class="social-bar" aria-hidden="false">
+    <a href="https://wa.me" target="_blank" rel="noopener" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+    <a href="https://t.me" target="_blank" rel="noopener" title="Telegram"><i class="fa-brands fa-telegram"></i></a>
+    <a href="mailto:info@alhijrahservices.com" title="Email"><i class="fa-solid fa-envelope"></i></a>
+  </div>
+
+  <header class="container panel hero">
+    <h1>مرحباً بكم في Alhijrah – بوابة التسجيل الذكي DV-2027</h1>
+    <p>تجربة فاخرة، تدقيق لحظي، ومسار واضح خطوة بخطوة</p>
+    <div class="buttons">
+      <a class="btn" href="#wizard"><i class="fa-solid fa-id-card-clip"></i> ابدأ الآن</a>
+      <a class="btn secondary" href="#tracker"><i class="fa-solid fa-magnifying-glass"></i> متابعة حالة ملف</a>
+      <button id="liteToggle" class="btn secondary" type="button"><i class="fa-solid fa-feather"></i> وضع خفيف</button>
+      <button id="voiceToggle" class="btn" type="button"><i class="fa-solid fa-volume-high"></i> مساعد صوتي</button>
+    </div>
+  </header>
+
+  <!-- Wizard -->
+  <section id="wizard" class="container panel wizard" aria-label="DV-2027 Wizard">
+    <div class="inline" style="justify-content:space-between;margin-bottom:6px">
+      <div class="inline"><span class="badge">اللغة: عربي</span><span class="badge">واجهة فاخرة</span></div>
+      <div class="inline"><span>نسبة الإكمال:</span> <b id="completePct">0%</b></div>
+    </div>
+    <div class="progress"><span id="progressBar"></span></div>
+
+    <!-- Assistant Bubble -->
+    <div id="assist" class="assist">
+      <div class="row"><i class="fa-solid fa-sparkles"></i><b> مُساعد Alhijrah</b></div>
+      <div id="assistText" style="margin-top:6px">ابدأ بكتابة اسمك كما في الجواز. سنقترح عليك أثناء الكتابة.</div>
+    </div>
+
+    <form id="dvForm" novalidate autocomplete="off">
+      <!-- STEP 1 -->
+      <fieldset class="step" data-step="1">
+        <legend class="badge">الخطوة 1: المعلومات الشخصية</legend>
+        <div class="steps">
+          <div class="col-6">
+            <label for="fullName">الاسم الكامل (بالإنجليزية)</label>
+            <div class="inline" style="gap:8px">
+              <!-- CHANGED: keep required on name only -->
+              <input id="fullName" class="ipt" placeholder="FIRST MIDDLE LAST" required />
+              <label class="btn secondary" for="passportImage"><i class="fa-solid fa-wand-magic-sparkles"></i> قراءة من صورة الجواز (OCR)</label>
+              <input id="passportImage" type="file" accept="image/*" class="hide" />
+            </div>
+            <div class="err" id="errName">الاسم يجب أن يكون بالأحرف الإنجليزية فقط.</div>
+          </div>
+          <div class="col-6">
+            <label for="dob">تاريخ الميلاد</label>
+            <!-- CHANGED: removed required (soft) -->
+            <input id="dob" type="date" class="ipt" />
+            <div class="err" id="errDob">العمر يجب أن يكون 18+.</div>
+          </div>
+          <div class="col-6">
+            <label for="gender">الجنس</label>
+            <!-- CHANGED: removed required (soft) -->
+            <select id="gender" class="sel">
+              <option value="">اختر</option><option>ذكر</option><option>أنثى</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label for="birthCity">مدينة الميلاد</label>
+            <input id="birthCity" class="ipt" placeholder="مثال: Sana'a / Unknown" />
+          </div>
+          <div class="col-6">
+            <label for="birthCountry">بلد الميلاد</label>
+            <!-- CHANGED: removed required (soft) -->
+            <input id="birthCountry" class="ipt" placeholder="Country of Birth" list="countryList"/>
+            <datalist id="countryList">
+              <option value="Yemen"></option><option value="Saudi Arabia"></option><option value="United Arab Emirates"></option>
+              <option value="Qatar"></option><option value="Oman"></option><option value="Kuwait"></option>
+              <option value="Jordan"></option><option value="Egypt"></option><option value="Turkey"></option>
+              <option value="USA"></option><option value="United Kingdom"></option><option value="Germany"></option>
+            </datalist>
+          </div>
+          <div class="col-6">
+            <label for="eligExplain">سبب الأهلية (عند بلد غير مؤهل)</label>
+            <input id="eligExplain" class="ipt" placeholder="بلد الزوج/الوالدين…" />
+          </div>
+        </div>
+        <div class="inline" style="justify-content:flex-end;margin-top:10px">
+          <button type="button" class="btn" id="to2">التالي</button>
+        </div>
+      </fieldset>
+
+      <!-- STEP 2 -->
+      <fieldset class="step hide" data-step="2">
+        <legend class="badge">الخطوة 2: الجواز والصورة</legend>
+        <div class="steps">
+          <div class="col-6">
+            <label for="passport">رقم الجواز</label>
+            <!-- CHANGED: soft -->
+            <input id="passport" class="ipt" placeholder="A1234567" />
+            <div class="err" id="errPass">رقم الجواز غير صحيح.</div>
+          </div>
+          <div class="col-6">
+            <label for="passportExpiry">تاريخ انتهاء الجواز</label>
+            <!-- CHANGED: soft -->
+            <input id="passportExpiry" type="date" class="ipt" />
+            <div class="err" id="errExpiry">يجب أن يكون الجواز صالحًا.</div>
+          </div>
+          <div class="col-12">
+            <label for="photo">رفع الصورة الشخصية (600×600، JPEG، خلفية بيضاء)</label>
+            <!-- CHANGED: soft -->
+            <input id="photo" type="file" accept="image/jpeg,image/jpg,image/png" class="file" />
+            <div class="err" id="errPhoto">الرجاء رفع صورة واضحة. سنقوم بتصحيحها تلقائيًا إذا لزم.</div>
+            <div id="photoReview" class="photo-review hide">
+              <div class="photo-grid">
+                <div class="photo-box">
+                  <img id="photoPreview" alt="preview" style="max-width:100%;max-height:230px;border-radius:8px"/>
+                </div>
+                <div>
+                  <ul id="photoChecks" style="padding-left:16px;margin:0"></ul>
+                  <div class="inline" style="margin-top:8px">
+                    <button class="btn" type="button" id="autoFixBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> تصحيح تلقائي</button>
+                    <button class="btn secondary" type="button" id="dlJpgBtn">تنزيل JPG</button>
+                    <button class="btn secondary" type="button" id="dlPngBtn">تنزيل PNG</button>
+                  </div>
+                  <div id="photoSizeHint" style="font-size:12px;color:#d1d5db;margin-top:6px">الحد الأقصى للحجم 240KB (JPEG)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="inline" style="justify-content:space-between;margin-top:10px">
+          <button type="button" class="btn secondary" id="back1">رجوع</button>
+          <button type="button" class="btn" id="to3">التالي</button>
+        </div>
+      </fieldset>
+
+      <!-- STEP 3 -->
+      <fieldset class="step hide" data-step="3">
+        <legend class="badge">الخطوة 3: معلومات التواصل</legend>
+        <div class="steps">
+          <div class="col-12">
+            <label for="address">العنوان الكامل</label>
+            <!-- CHANGED: soft -->
+            <textarea id="address" class="txt ipt" rows="2" placeholder="الدولة – الولاية/المدينة – الرمز البريدي"></textarea>
+          </div>
+          <div class="col-6">
+            <label for="currentCountry">الدولة الحالية</label>
+            <!-- CHANGED: soft -->
+            <input id="currentCountry" class="ipt" placeholder="Current Country" list="countryList"/>
+          </div>
+          <div class="col-6">
+            <label for="email">البريد الإلكتروني</label>
+            <!-- REQUIRED: keep -->
+            <input id="email" type="email" class="ipt" placeholder="name@example.com" required />
+            <div class="err" id="errEmail">صيغة البريد غير صالحة.</div>
+          </div>
+          <div class="col-6">
+            <label for="phone">رقم الهاتف (E.164)</label>
+            <!-- REQUIRED: keep -->
+            <input id="phone" class="ipt" placeholder="+1313919xxxx" required />
+            <div class="err" id="errPhone">استخدم صيغة دولية E.164.</div>
+          </div>
+          <div class="col-6">
+            <label for="education">المستوى التعليمي</label>
+            <!-- CHANGED: soft -->
+            <select id="education" class="sel">
+              <option value="">اختر</option>
+              <option value="hs">ثانوي</option>
+              <option value="uni">جامعي</option>
+              <option value="pg">دراسات عليا</option>
+            </select>
+            <div class="err" id="errEdu">يجب اختيار مستوى مؤهل.</div>
+          </div>
+        </div>
+        <div class="inline" style="justify-content:space-between;margin-top:10px">
+          <button type="button" class="btn secondary" id="back2">رجوع</button>
+          <button type="button" class="btn" id="to4">التالي</button>
+        </div>
+      </fieldset>
+
+      <!-- STEP 4 -->
+      <fieldset class="step hide" data-step="4">
+        <legend class="badge">الخطوة 4: الحالة الاجتماعية</legend>
+        <div class="steps">
+          <div class="col-6">
+            <label for="maritalStatus">الحالة الاجتماعية</label>
+            <select id="maritalStatus" class="sel">
+              <option value="">اختر</option>
+              <option value="single">أعزب/عزباء</option>
+              <option value="married">متزوج/ة</option>
+              <option value="divorced">مطلق/ة</option>
+              <option value="widowed">أرمل/ة</option>
+            </select>
+          </div>
+        </div>
+        <div id="spouseBlock" class="hide" style="margin-top:10px">
+          <div class="badge">بيانات الزوج/الزوجة</div>
+          <div class="steps" style="margin-top:8px">
+            <div class="col-6"><label>الاسم الكامل</label><input id="spouseName" class="ipt"/></div>
+            <div class="col-6"><label>تاريخ الميلاد</label><input id="spouseDob" type="date" class="ipt"/></div>
+            <div class="col-6"><label>الجنس</label>
+              <select id="spouseGender" class="sel"><option value="">—</option><option>ذكر</option><option>أنثى</option></select>
+            </div>
+            <div class="col-6"><label>الدولة</label><input id="spouseCountry" class="ipt" list="countryList"/></div>
+            <div class="col-12"><label>صورة الزوج/الزوجة (600×600)</label><input id="spousePhoto" type="file" accept="image/*" class="file"/></div>
+          </div>
+        </div>
+        <div class="inline" style="justify-content:space-between;margin-top:10px">
+          <button type="button" class="btn secondary" id="back3">رجوع</button>
+          <button type="button" class="btn" id="to5">التالي</button>
+        </div>
+      </fieldset>
+
+      <!-- STEP 5 -->
+      <fieldset class="step hide" data-step="5">
+        <legend class="badge">الخطوة 5: عدد الأطفال</legend>
+        <div class="steps">
+          <div class="col-6">
+            <label for="children">عدد الأبناء</label>
+            <input id="children" type="number" min="0" max="6" class="ipt" value="0" />
+          </div>
+        </div>
+        <div id="childrenList" style="margin-top:10px"></div>
+        <div class="inline" style="justify-content:space-between;margin-top:10px">
+          <button type="button" class="btn secondary" id="back4">رجوع</button>
+          <button type="button" class="btn" id="to6">التالي</button>
+        </div>
+      </fieldset>
+
+      <!-- STEP 6 -->
+      <fieldset class="step hide" data-step="6">
+        <legend class="badge">الخطوة 6: الإقرارات والتوقيع</legend>
+        <div class="panel" style="padding:10px">
+          <label class="inline" style="gap:8px"><input type="checkbox" id="ackSingle"/> <span>أقرّ بتقديم طلب واحد فقط</span></label><br/>
+          <label class="inline" style="gap:8px"><input type="checkbox" id="ackPrivacy"/> <span>أوافق على السياسة والخصوصية</span></label>
+        </div>
+        <div style="border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:10px;margin-top:10px">
+          <label for="sig" class="inline" style="justify-content:space-between;width:100%">
+            <span>التوقيع الإلكتروني</span> <button type="button" class="btn secondary" id="clearSig" style="padding:6px 10px">مسح</button>
+          </label>
+          <canvas id="sig" style="width:100%;height:180px;background:#fff;border-radius:8px"></canvas>
+        </div>
+        <div class="inline" style="justify-content:space-between;margin-top:10px">
+          <button type="button" class="btn secondary" id="back5">رجوع</button>
+          <button type="button" class="btn" id="to7">التالي</button>
+        </div>
+      </fieldset>
+
+      <!-- STEP 7 (Review) -->
+      <fieldset class="step hide" data-step="7">
+        <legend class="badge">الخطوة 7: المراجعة النهائية</legend>
+        <div id="reviewBox" class="panel vip-card" style="padding:14px"></div>
+
+        <!-- Left-aligned submit for VIP look -->
+        <div class="inline" style="justify-content:flex-start;gap:10px;margin-top:10px">
+          <button type="button" class="btn secondary" id="back6">رجوع</button>
+          <button type="submit" class="btn" id="submitBtn"><i class="fa-solid fa-paper-plane"></i> إرسال الطلب</button>
+        </div>
+
+        <p style="font-size:12px;color:#d1d5db;margin-top:8px">إخلاء مسؤولية: نحن جهة مساعدة خاصة ولسنا جهة حكومية. تقديمك عبرنا لا يضمن الفوز بالقرعة.</p>
+      </fieldset>
+    </form>
+  </section>
+
+  <!-- Client Card (VIP) -->
+  <section id="clientCardWrap" class="container hide">
+    <div id="clientCard" class="panel vip-card">
+      <div class="vip-header">
+        <div class="vip-glass-header vip-brand"><i class="fa-solid fa-crown"></i> Alhijrah • VIP Case Card</div>
+        <div class="inline" style="gap:8px">
+          <span class="chip ok"><i class="fa-solid fa-circle-check"></i><span>تم الاستلام – بانتظار المراجعة</span></span>
+          <span class="chip"><i class="fa-solid fa-calendar"></i> <span id="ccDate">—</span></span>
+        </div>
+      </div>
+
+      <div class="kv">
+        <strong>الاسم الكامل:</strong><span id="ccName">—</span>
+        <strong>رقم الملف (TrackID):</strong><span id="ccTrack">—</span>
+      </div>
+
+      <div class="inline" style="gap:18px;margin-top:14px;align-items:center">
+        <div class="qr-wrap">
+          <div class="qr-pulse"></div>
+          <div id="ccQr" style="width:150px;height:150px"></div>
+        </div>
+        <div style="font-size:12px;color:#e5e7eb">
+          <div>• احتفظ برقم الملف لمتابعة حالتك</div>
+          <div>• امسح رمز QR للوصول السريع لبطاقتك</div>
+        </div>
+      </div>
+
+      <div class="vip-footer">
+        <div class="inline" style="gap:10px">
+          <a class="btn" id="ccOpenBtn" target="_blank" rel="noopener"><i class="fa-solid fa-id-card-clip"></i> فتح البطاقة</a>
+          <a class="btn secondary" id="ccPdfBtn" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i> تنزيل PDF</a>
+        </div>
+        <a id="waLink" class="btn" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> مشاركة واتساب</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Case Status Tracker -->
+  <section id="tracker" class="container">
+    <h2 class="section-title">متابعة الحالة (Case Status Tracker)</h2>
+    <div class="panel" style="padding:16px">
+      <div class="steps">
+        <div class="col-6">
+          <label>طريقة البحث</label>
+          <select id="trackMethod" class="sel">
+            <option value="trackid" selected>TrackID / Case Number</option>
+            <option value="email">البريد الإلكتروني</option>
+            <option value="phone">رقم الهاتف (E.164)</option>
+          </select>
+        </div>
+        <div class="col-6">
+          <label>القيمة</label>
+          <input id="trackValue" class="ipt" placeholder="DV27-ALH-YYYYMMDD-0001 / name@example.com / +1..." />
+        </div>
+        <div class="col-12 inline" style="justify-content:flex-end">
+          <button class="btn secondary" type="button" id="resetTrackerBtn">إعادة ضبط</button>
+          <button class="btn" type="button" id="lookupBtn">ابحث</button>
+        </div>
+        <div class="col-12">
+          <div id="trackPlaceholder" style="color:#d1d5db">ستظهر نتيجة البحث هنا…</div>
+          <div id="trackCard" class="hide">
+            <div class="inline" style="gap:8px;margin-bottom:8px;flex-wrap:wrap">
+              <span class="chip"><i class="fa-solid fa-hashtag"></i> <b id="trTrack">—</b></span>
+              <span class="chip"><i class="fa-solid fa-user"></i> <span id="trName">—</span></span>
+              <span class="chip" id="trStatusChip"><i class="fa-solid fa-bars-progress"></i> <span id="trStatus">—</span></span>
+              <span class="chip"><i class="fa-solid fa-layer-group"></i> <span id="trStage">—</span></span>
+            </div>
+            <div id="timeline" style="border-left:2px solid rgba(255,255,255,.2);padding-left:10px"></div>
+            <div class="kv" style="margin-top:8px">
+              <strong>تاريخ التقديم:</strong><span id="trDate">—</span>
+              <strong>ملاحظات:</strong><span id="trNotes">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Floating Dock -->
+  <div class="dock">
+    <div class="dock-inner">
+      <a href="#wizard" class="btn"><i class="fa-solid fa-clipboard-list"></i> النموذج</a>
+      <a href="#tracker" class="btn secondary"><i class="fa-solid fa-bolt"></i> المتابعة</a>
+      <button id="shareBtn" class="btn"><i class="fa-solid fa-share-nodes"></i> مشاركة</button>
+    </div>
+  </div>
+
+  <!-- VIP Closing -->
+  <footer class="container vip">
+    <div class="closing">
+      <h3 class="section-title" style="margin-top:0">قسم ختامي رسمي</h3>
+      <div class="inline" style="gap:10px;flex-wrap:wrap">
+        <span class="chip"><i class="fa-solid fa-building"></i> Alhijrah Services</span>
+        <span class="chip"><i class="fa-solid fa-phone"></i> +1 (313) 919-0000</span>
+        <span class="chip"><i class="fa-solid fa-envelope"></i> support@alhijrah.example</span>
+        <a class="btn" href="https://wa.me" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+        <a class="btn secondary" href="https://t.me" target="_blank" rel="noopener"><i class="fa-brands fa-telegram"></i> Telegram</a>
+        <a class="btn secondary" href="mailto:support@alhijrah.example"><i class="fa-solid fa-paper-plane"></i> Email</a>
+      </div>
+      <p class="quote">"نقودك خطوة بخطوة نحو تقديم احترافي، بثقة ووضوح وتقنية عالية."</p>
+    </div>
+  </footer>
+
+  <!-- Success Modal -->
+  <div id="successOverlay" class="modal-overlay" aria-modal="true" role="dialog">
+    <div class="modal" id="successModal">
+      <h3>تم إرسال طلبك بنجاح</h3>
+      <div class="kv">
+        <strong>TrackID:</strong><span id="succTrack">—</span>
+      </div>
+      <p>يمكنك فتح بطاقة العميل VIP أو مشاركتها مع فريق Alhijrah لمتابعة الحالة.</p>
+      <div class="inline" style="justify-content:flex-end;margin-top:10px">
+        <button class="btn secondary" id="succClose">إغلاق</button>
+        <a class="btn" id="succOpenCard" target="_blank" rel="noopener">فتح بطاقة العميل</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+<script>
+/* ***** ======= CONFIG ======= ***** */
+// Apps Script Web App URL (make sure deployment is set to Anyone with the link)
+// Updated Apps Script Web App URL (ensure the deployment has public access)
+// This new URL points to the latest version of the DV-2027 Apps Script backend provided by the user.
+    // Updated Apps Script endpoint (same for submissions and lookups)
+    const APP_URL = "https://script.google.com/macros/s/AKfycbzf-We6RkBaL46VBoo4Ejtzhbrh8IiKKtdOKJjeclDt5xEWrhQH1sL-MAWpYFf9SxYlVQ/exec";
+    const LOOKUP_URL = APP_URL;
+
+/*
+ * Persist form progress locally so users don't lose their data on accidental refreshes.
+ * The functions below store form values into localStorage whenever a field changes,
+ * and restore them when the page loads. Sensitive fields like file inputs are skipped.
+ */
+const FORM_STORAGE_KEY = 'dvFormData';
+
+function saveFormData() {
+  try {
+    const data = {};
+    document.querySelectorAll('#dvForm input, #dvForm select, #dvForm textarea').forEach(el => {
+      // Skip file inputs to avoid storing blobs in localStorage
+      if (el.type === 'file' || el.id === undefined) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        data[el.id] = el.checked;
+      } else {
+        data[el.id] = el.value;
+      }
+    });
+    localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Could not save form data', e);
+  }
+}
+
+function loadFormData() {
+  try {
+    const data = JSON.parse(localStorage.getItem(FORM_STORAGE_KEY) || '{}');
+    Object.keys(data).forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = data[id];
+      } else {
+        el.value = data[id];
+      }
+    });
+  } catch (e) {
+    console.warn('Could not load form data', e);
+  }
+}
+
+function clearFormData() {
+  localStorage.removeItem(FORM_STORAGE_KEY);
+}
+
+/* Regex */
+const NAME_RE = /^[A-Z][A-Z\s\-']{1,}$/;
+const PASS_RE = /^[A-Z0-9]{6,12}$/;
+const PHONE_E164 = /^\+[1-9]\d{7,14}$/;
+
+/* ***** ======= 3D BG & Lite Mode ======= ***** */
+(function initVanta(){
+  try{
+    if (document.body.classList.contains('lite')) return;
+    if (window.VANTA && VANTA.WAVES) {
+      VANTA.WAVES({ el:"#bg", mouseControls:true, touchControls:true, minHeight:200, minWidth:200, scale:1, color:0x0b1a39, shininess:50, waveHeight:20, waveSpeed:.7 });
+    }
+  }catch(_){ /* ignore visual errors */ }
+})();
+document.getElementById('liteToggle').addEventListener('click', ()=>{
+  document.body.classList.toggle('lite');
+});
+
+/* ***** ======= Helpers ======= ***** */
+const $=(id)=>document.getElementById(id);
+const progressBar=$('progressBar'), completePct=$('completePct');
+const toast=(m)=>{const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4200);};
+const sanitize=(s)=>String(s||'').replace(/[<>&]/g,c=>({ '<':'&lt;','>':'&gt;','&':'&amp;' }[c]));
+function show(el){el.classList.remove('hide')} function hide(el){el.classList.add('hide')}
+function setErr(id,flag){const el=$(id); if(el) el.style.display = flag?'block':'none'}
+function ripple(e){const d=document.createElement('span'); d.className='ripple'; const rect=e.currentTarget.getBoundingClientRect(); d.style.width=d.style.height=Math.max(rect.width,rect.height)+'px'; d.style.left=(e.clientX-rect.left-d.offsetWidth/2)+'px'; d.style.top=(e.clientY-rect.top-d.offsetHeight/2)+'px'; e.currentTarget.appendChild(d); setTimeout(()=>d.remove(),600);} 
+document.querySelectorAll('.btn').forEach(b=>b.addEventListener('click',ripple));
+window.addEventListener('error',()=>toast('عُذرًا، حدث خطأ غير متوقع.')); 
+
+// When the DOM is ready, restore any saved form data and attach listeners to save changes automatically.
+document.addEventListener('DOMContentLoaded', () => {
+  loadFormData();
+  const inputs = document.querySelectorAll('#dvForm input, #dvForm select, #dvForm textarea');
+  inputs.forEach(el => {
+    // Save data on both change and input (for immediate feedback on text fields)
+    el.addEventListener('change', saveFormData);
+    el.addEventListener('input', saveFormData);
+  });
+});
+
+/* ***** ======= Assistant (Visual + Voice) ======= ***** */
+let voiceEnabled=false;
+const assistText=$('assistText');
+const VO_HINTS={
+  fullName:"اكتب اسمك الثلاثي كما في الجواز. يمكنك استخدام قراءة الجواز لاستخراج الاسم تلقائياً.",
+  dob:"اختر تاريخ الميلاد الصحيح — يُفضَّل 18 سنة فأكثر.",
+  email:"اكتب بريدك الإلكتروني بدقة، سنرسل لك إشعارات الحالة.",
+  phone:"أدخل رقم الهاتف بصيغة دولية مثل +1313...",
+  passport:"أدخل رقم جوازك بالأحرف الإنجليزية والأرقام فقط.",
+  photo:"حمّل صورة 600×600 بخلفية بيضاء، ويمكننا تصحيحها تلقائيًا.",
+  address:"أدخل عنوانك الكامل: الدولة، المدينة، الرمز البريدي."
+};
+function speak(t){ if(!voiceEnabled) return; const u=new SpeechSynthesisUtterance(t); u.lang='ar'; speechSynthesis.speak(u); }
+$('voiceToggle').addEventListener('click',()=>{
+  voiceEnabled=!voiceEnabled; toast(voiceEnabled?'المساعد الصوتي مُفعل':'تم إيقاف المساعد الصوتي');
+});
+['fullName','dob','email','phone','passport','photo','address'].forEach(id=>{
+  const el=$(id); if(!el) return;
+  el.addEventListener('focus',()=>{ const t=VO_HINTS[id]||'معلومات مساعدة'; assistText.textContent=t; speak(t); });
+});
+
+/* ***** ======= Wizard Nav ======= ***** */
+let step=1,totalSteps=7;
+function goto(n){
+  step=n;
+  document.querySelectorAll('.step').forEach(s=>{(+s.dataset.step===step)?show(s):hide(s)});
+  const ratio=Math.round((step/totalSteps)*100);
+  progressBar.style.width=ratio+'%'; completePct.textContent=ratio+'%';
+  window.scrollTo({top:document.querySelector('#wizard').offsetTop-10,behavior:'smooth'});
+}
+$('to2').onclick=async()=>{ if(await validateStep1()) goto(2) };
+$('back1').onclick=()=>goto(1); $('to3').onclick=async()=>{ if(await validateStep2()) goto(3) };
+$('back2').onclick=()=>goto(2); $('to4').onclick=async()=>{ if(await validateStep3()) goto(4) };
+$('back3').onclick=()=>goto(3); $('to5').onclick=()=>{ toggleSpouse(); goto(5) };
+$('back4').onclick=()=>goto(4); $('to6').onclick=()=>goto(6);
+$('back5').onclick=()=>goto(5); $('to7').onclick=()=>{ buildReview(); goto(7) };
+$('back6').onclick=()=>goto(6);
+
+/* ***** ======= Validations (SOFT except Name/Email/Phone) ======= ***** */
+function isAdult(d){ if(!d) return true; const dob=new Date(d), now=new Date(); let age=now.getFullYear()-dob.getFullYear(); const m=now.getMonth()-dob.getMonth(); if(m<0||(m===0&&now.getDate()<dob.getDate())) age--; return age>=18; }
+async function validateStep1(){
+  let ok=true;
+  const name=$('fullName').value.trim().toUpperCase();
+  if(!NAME_RE.test(name)){setErr('errName',true); ok=false}else setErr('errName',false);
+  const dob=$('dob').value; // soft
+  if(dob && !isAdult(dob)){setErr('errDob',true); ok=false}else setErr('errDob',false);
+  return ok;
+}
+async function validateStep2(){
+  // soft checks: only warn visually
+  const pass=$('passport').value.trim().toUpperCase(); setErr('errPass', pass && !PASS_RE.test(pass));
+  const exp=$('passportExpiry').value; setErr('errExpiry', exp && new Date(exp)<new Date(new Date().toDateString()));
+  const f=$('photo').files[0]; setErr('errPhoto', false);
+  if(f){ await ensureApplicantPhotoPrepared(); show(photoReview); } else { hide(photoReview); }
+  return true;
+}
+async function validateStep3(){
+  let ok=true;
+  const email=$('email').value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setErr('errEmail',true); ok=false}else setErr('errEmail',false);
+  normalizePhone();
+  const phone=$('phone').value.trim();
+  if(!PHONE_E164.test(phone)){setErr('errPhone',true); ok=false}else setErr('errPhone',false);
+  // education/address soft
+  setErr('errEdu', false);
+  return ok;
+}
+
+/* ***** ======= Conditional blocks ======= ***** */
+const spouseBlock=$('spouseBlock');
+$('maritalStatus').addEventListener('change', toggleSpouse);
+function toggleSpouse(){ const married=$('maritalStatus').value==='married'; married?show(spouseBlock):hide(spouseBlock); }
+$('children').addEventListener('input', renderChildren);
+function childCard(i){ return `
+      <div class="panel" style="padding:10px;border-style:dashed">
+        <div class="inline" style="justify-content:space-between"><b>بيانات الطفل</b><span>#${i+1}</span></div>
+        <div class="steps" style="margin-top:6px">
+          <div class="col-6"><label>الاسم الكامل</label><input class="ipt" id="chName${i}"/></div>
+          <div class="col-6"><label>تاريخ الميلاد</label><input type="date" class="ipt" id="chDob${i}"/></div>
+          <div class="col-6"><label>الجنس</label>
+            <select class="sel" id="chGender${i}"><option value="">—</option><option>ذكر</option><option>أنثى</option></select>
+          </div>
+          <div class="col-6"><label>الدولة</label><input class="ipt" id="chCountry${i}" list="countryList"/></div>
+          <div class="col-12"><label>صورة الطفل (اختياري) 600×600</label><input type="file" accept="image/*" class="file" id="chPhoto${i}"/></div>
+        </div>
+      </div>`; }
+function renderChildren(){ const n=Math.max(0,Math.min(6,parseInt(($('children').value||'0'),10)||0)); const box=$('childrenList'); box.innerHTML=''; for(let i=0;i<n;i++) box.insertAdjacentHTML('beforeend', childCard(i)); }
+
+/* ***** ======= OCR (passport) ======= ***** */
+$('passportImage').addEventListener('change', async (ev)=>{
+  const file=ev.target.files[0]; if(!file) return;
+  try{
+    const { data:{ text } } = await Tesseract.recognize(file, 'eng');
+    const up=text.toUpperCase(); const mrz=(up.match(/[A-Z0-9<]{20,}/g)||[])[0]||''; let nameGuess='';
+    if(mrz){ const parts=mrz.replace(/</g,' ').split(' ').filter(Boolean); nameGuess=parts.slice(1,5).join(' '); }
+    if(nameGuess) $('fullName').value=nameGuess.replace(/\s+/g,' ').trim();
+    toast('تمّت قراءة بيانات الجواز (OCR).');
+  }catch(err){ console.warn(err); toast('تعذر قراءة الجواز، جرّب صورة أوضح.'); }
+  ev.target.value='';
+});
+
+/* ***** ======= Phone normalize ======= ***** */
+const phoneIpt=$('phone');
+function normalizePhone(){ if(!phoneIpt) return; const raw=(phoneIpt.value||'').replace(/\s+/g,''); if(!raw) return;
+  try{ let candidate=raw; if(!raw.startsWith('+')) candidate='+1'+raw.replace(/^0+/, ''); const pn=libphonenumber.parsePhoneNumber(candidate); if(pn&&pn.isValid()){ phoneIpt.value=pn.number; } }
+  catch(e){ if(!raw.startsWith('+')) phoneIpt.value='+1'+raw.replace(/^0+/, ''); } }
+phoneIpt.addEventListener('blur', normalizePhone);
+
+/* ***** ======= Photo handling ======= ***** */
+const photoInput=$('photo'), photoReview=$('photoReview'), photoPreview=$('photoPreview'), photoChecks=$('photoChecks');
+const autoFixBtn=$('autoFixBtn'); const dlJpgBtn=$('dlJpgBtn'); const dlPngBtn=$('dlPngBtn');
+// Store the processed photo blob and its DataURI representation
+window.processedPhotoBlob = null;
+window.processedPhotoData = '';
+photoInput.addEventListener('change', async (e)=>{ const f=e.target.files[0]; if(!f) return; if(!/^image\/(jpeg|jpg|png)$/i.test(f.type)){ toast('صيغة الصورة يجب أن تكون JPG/PNG'); e.target.value=''; return; } if(f.size>12*1024*1024){ toast('أقصى حجم مقبول للرفع 12MB'); e.target.value=''; return; } await assessPhoto(f); });
+if(autoFixBtn) autoFixBtn.addEventListener('click', async ()=>{ const f=photoInput.files[0]; if(!f) return; await autoFixPhoto(f); });
+if(dlJpgBtn) dlJpgBtn.addEventListener('click', ()=> downloadCorrected('jpg'));
+if(dlPngBtn) dlPngBtn.addEventListener('click', ()=> downloadCorrected('png'));
+async function ensureApplicantPhotoPrepared(){
+  if (window.processedPhotoBlob) return true;
+  const f = photoInput.files[0];
+  if (!f) return false;
+  window.processedPhotoBlob = await resizeTo600SquareJPEG(f, 0.95, 240 * 1024);
+  // Convert to DataURI for payload
+  try {
+    const reader = new FileReader();
+    reader.onloadend = function() {
+      window.processedPhotoData = reader.result;
+    };
+    reader.readAsDataURL(window.processedPhotoBlob);
+  } catch (err) {
+    console.warn('Could not convert photo to DataURI', err);
+    window.processedPhotoData = '';
+  }
+  return true;
+}
+async function assessPhoto(file){ show(photoReview); photoChecks.innerHTML=''; photoPreview.src=''; window.processedPhotoBlob=null; const img=await loadImage(file); photoPreview.src=URL.createObjectURL(file); const okDim=(img.width===600&&img.height===600); const bgOK=await checkBackgroundLight(img); const sizeOK=file.size<=240*1024; addCheck(okDim,`الأبعاد 600×600 بكسل (${img.width}×${img.height})`); addCheck(sizeOK,`حجم الملف (${Math.round(file.size/1024)}KB)`); addCheck(bgOK,'الخلفية فاتحة ومتجانسة'); if(!(okDim&&sizeOK)){ await autoFixPhoto(file); } }
+async function autoFixPhoto(file){
+  const blob = await resizeTo600SquareJPEG(file, 0.95, 240 * 1024);
+  window.processedPhotoBlob = blob;
+  // Convert processed blob into DataURI for payload
+  try {
+    const reader = new FileReader();
+    reader.onloadend = function() {
+      window.processedPhotoData = reader.result;
+    };
+    reader.readAsDataURL(blob);
+  } catch (err) {
+    console.warn('Could not convert corrected photo to DataURI', err);
+    window.processedPhotoData = '';
+  }
+  photoPreview.src = URL.createObjectURL(blob);
+  const fixedImg = await loadImage(blob);
+  const okDim = (fixedImg.width === 600 && fixedImg.height === 600);
+  const bgOK = await checkBackgroundLight(fixedImg);
+  const sizeOK = blob.size <= 240 * 1024;
+  photoChecks.innerHTML = '';
+  addCheck(okDim, `الأبعاد 600×600 بكسل (${fixedImg.width}×${fixedImg.height})`);
+  addCheck(sizeOK, `حجم الملف (${Math.round(blob.size / 1024)}KB)`);
+  addCheck(bgOK, 'الخلفية فاتحة ومتجانسة');
+  toast('✅ تم تصحيح الصورة تلقائيًا');
+}
+function addCheck(ok,msg){ const li=document.createElement('li'); li.innerHTML=(ok?'<i class="fa-solid fa-check ok-txt"></i>':'<i class="fa-solid fa-xmark bad-txt"></i>')+' '+sanitize(msg); photoChecks.appendChild(li); }
+function loadImage(fileOrBlob){ return new Promise((res,rej)=>{ const url=URL.createObjectURL(fileOrBlob); const im=new Image(); im.onload=()=>{ URL.revokeObjectURL(url); res(im); }; im.onerror=rej; im.src=url; }); }
+async function canvasToBlob(cv,type,q){ return await new Promise(r=>cv.toBlob(b=>r(b),type,q)); }
+async function checkBackgroundLight(img){ const cv=document.createElement('canvas'); cv.width=img.width; cv.height=img.height; const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0); function avgAt(x,y,w=10,h=10){ const d=ctx.getImageData(x,y,w,h).data; let s=0,c=0; for(let i=0;i<d.length;i+=4){ s+=(d[i]+d[i+1]+d[i+2])/3; c++; } return (s/c); } const tl=avgAt(5,5), tr=avgAt(img.width-15,5), bl=avgAt(5,img.height-15), br=avgAt(img.width-15,img.height-15); const avg=(tl+tr+bl+br)/4; return avg>200; }
+async function downloadCorrected(fmt){ let blob=window.processedPhotoBlob; if(!blob){ toast('الصورة لا تزال غير مصححة'); return; } if(fmt==='png'){ const im=await loadImage(blob); const cv=document.createElement('canvas'); cv.width=600; cv.height=600; const ctx=cv.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,600,600); ctx.drawImage(im,0,0,600,600); blob=await canvasToBlob(cv,'image/png'); } else { const im=await loadImage(blob); const cv=document.createElement('canvas'); cv.width=600; cv.height=600; const ctx=cv.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,600,600); ctx.drawImage(im,0,0,600,600); let q=0.95; blob=await canvasToBlob(cv,'image/jpeg',q); while(blob.size>240*1024&&q>0.62){ q-=0.03; blob=await canvasToBlob(cv,'image/jpeg',q); } } const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`DV2027_photo.${fmt==='png'?'png':'jpg'}`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+async function resizeTo600SquareJPEG(fileOrBlob,qStart=0.95,maxBytes=240*1024){
+  const img=await loadImage(fileOrBlob);
+  const side=Math.min(img.width,img.height);
+  const sx=(img.width-side)/2,sy=(img.height-side)/2;
+  const cv=document.createElement('canvas'); cv.width=600; cv.height=600; const ctx=cv.getContext('2d');
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,600,600);
+  ctx.drawImage(img,sx,sy,side,side,0,0,600,600);
+  let quality=qStart;
+  let blob=await canvasToBlob(cv,'image/jpeg',quality);
+  while(blob.size>maxBytes && quality>0.4){ quality-=0.05; blob=await canvasToBlob(cv,'image/jpeg',quality); }
+  return blob;
+}
+
+/* ***** ======= Review (VIP layout) ======= ***** */
+function buildReview(){
+  const sections = [
+    {title:'البيانات الشخصية', step:1, rows:[['fullName','الاسم'],['dob','تاريخ الميلاد'],['gender','الجنس'],['birthCity','مدينة الميلاد'],['birthCountry','بلد الميلاد'],['eligExplain','سبب الأهلية']]},
+    {title:'الجواز والصورة', step:2, rows:[['passport','رقم الجواز'],['passportExpiry','انتهاء الجواز']]},
+    {title:'التواصل والدولة', step:3, rows:[['address','العنوان'],['currentCountry','الدولة الحالية'],['email','البريد'],['phone','الهاتف'],['education','التعليم']]},
+    {title:'الحالة الاجتماعية', step:4, rows:[['maritalStatus','الحالة الاجتماعية']]}
+  ];
+  const married = $('maritalStatus').value==='married';
+  let html = '<div class="review-grid">';
+  sections.forEach(sec=>{
+    html += `<div class="review-card"><h4>${sec.title}<button class="review-edit" onclick="goto(${sec.step})"><i class="fa-solid fa-pen"></i> تعديل</button></h4>`;
+    sec.rows.forEach(([id,label])=>{ const v=$(id)?.value||'—'; html+=`<div class="review-pair"><div><strong>${label}</strong></div><div>${sanitize(v)}</div></div>`; });
+    html += '</div>';
+  });
+  if(married){
+    html += `<div class="review-card"><h4>بيانات الزوج/الزوجة<button class="review-edit" onclick="goto(4)"><i class="fa-solid fa-pen"></i> تعديل</button></h4>`;
+    html += `<div class="review-pair"><div><strong>الاسم</strong></div><div>${sanitize($('spouseName').value||'—')}</div></div>`;
+    html += `<div class="review-pair"><div><strong>الميلاد</strong></div><div>${sanitize($('spouseDob').value||'—')}</div></div>`;
+    html += `<div class="review-pair"><div><strong>الجنس</strong></div><div>${sanitize($('spouseGender').value||'—')}</div></div>`;
+    html += `<div class="review-pair"><div><strong>الدولة</strong></div><div>${sanitize($('spouseCountry').value||'—')}</div></div>`;
+    html += '</div>';
+  }
+  const n=parseInt($('children').value||'0',10)||0;
+  if(n>0){
+    let block = `<div class="review-card"><h4>الأطفال (${n})<button class="review-edit" onclick="goto(5)"><i class="fa-solid fa-pen"></i> تعديل</button></h4>`;
+    for(let i=0;i<n;i++){
+      block += `<div class="review-pair"><div><strong>طفل #${i+1}</strong></div><div>${sanitize($('chName'+i)?.value||'—')} | ${sanitize($('chDob'+i)?.value||'—')} | ${sanitize($('chGender'+i)?.value||'—')} | ${sanitize($('chCountry'+i)?.value||'—')}</div></div>`;
+    }
+    block += '</div>';
+    html += block;
+  }
+  html += '</div>';
+  $('reviewBox').innerHTML=html;
+}
+
+/* ***** ======= Submit ======= ***** */
+const dvForm=$('dvForm');
+dvForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  if($('submitBtn').disabled) return;
+  if(!$('ackSingle').checked || !$('ackPrivacy').checked){ toast('يرجى الإقرار بالبنود: طلب واحد + الخصوصية.'); return; }
+  $('submitBtn').disabled=true; $('submitBtn').innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> جاري الإرسال…';
+  const ok1=await validateStep1(), ok2=await validateStep2(), ok3=await validateStep3();
+  if(!(ok1&&ok2&&ok3)){ $('submitBtn').disabled=false; $('submitBtn').innerHTML='<i class="fa-solid fa-paper-plane"></i> إرسال الطلب'; toast('يرجى استكمال الحقول المطلوبة'); return; }
+  const trackId = generateTrackID();
+  const now = new Date();
+  const dateStr = now.toLocaleString();
+  // Show VIP card immediately
+  show($('clientCardWrap'));
+  $('ccName').textContent = $('fullName').value.trim();
+  $('ccTrack').textContent = trackId;
+  $('ccDate').textContent = dateStr;
+  $('ccQr').innerHTML = "";
+  new QRCode($('ccQr'), trackId);
+  const cardLink = buildCardLink(trackId);
+  // Build WhatsApp sharing message
+  const waMsg = `شكراً لتقديمك في برنامج DV-2027 ✅%0Aالاسم: ${encodeURIComponent($('fullName').value.trim())}%0Aرقم الملف (TrackID): ${trackId}%0Aرابط البطاقة: ${encodeURIComponent(cardLink)}`;
+  $('waLink').href = "https://wa.me/?text=" + waMsg;
+  // Build payload
+  const payload = buildPayload(trackId, now);
+  let okSubmit = false;
+  try {
+    // Post JSON to Apps Script; Content-Type header is required for JSON parsing
+    const res = await fetch(APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      mode: 'cors'
+    });
+    okSubmit = res.ok;
+    // Optionally parse JSON response (if script returns JSON)
+    // const json = await res.json();
+  } catch (err) {
+    console.warn('Apps Script error:', err);
+    okSubmit = false;
+  }
+  $('submitBtn').disabled = false;
+  $('submitBtn').innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال الطلب';
+  toast(okSubmit ? '✅ تم إرسال طلبك بنجاح وتم إنشاء بطاقة VIP.' : '⚠️ تم إنشاء البطاقة محليًا، لكن لم نتمكّن من تأكيد الحفظ على الخادم.');
+  // Scroll card into view
+  document.getElementById('clientCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Update success modal
+  $('succTrack').textContent = trackId;
+  $('succOpenCard').href = cardLink;
+  show($('successOverlay'));
+});
+/*
+ * Build a plain JavaScript object with all form values instead of using FormData. This makes it easier
+ * to connect with a Google Sheets back-end via Apps Script. Attachments like the applicant photo and
+ * signature are converted into Data URI strings so they can be stored in a sheet. Children are stored
+ * as an array of objects. The payload structure aligns with the expected columns in the back-end sheet.
+ */
+function buildPayload(trackId, now){
+  normalizePhone();
+  const data = {};
+  // Basic fields
+  data.trackId = trackId;
+  data.submissionUTC = now.toISOString();
+  data.pageUrl = location.href;
+  data.fullName = $('fullName').value.trim();
+  data.dob = $('dob').value || '';
+  data.gender = $('gender').value || '';
+  data.birthCity = $('birthCity').value.trim() || '';
+  data.birthCountry = $('birthCountry').value.trim() || '';
+  data.eligExplain = $('eligExplain').value.trim() || '';
+  data.passport = $('passport').value.trim().toUpperCase() || '';
+  data.passportExpiry = $('passportExpiry').value || '';
+  data.address = $('address').value.trim() || '';
+  data.currentCountry = $('currentCountry').value.trim() || '';
+  data.email = $('email').value.trim();
+  data.phone = $('phone').value.trim();
+  data.education = $('education').value || '';
+  data.maritalStatus = $('maritalStatus').value || '';
+  // Spouse fields
+  data.spouseName = $('spouseName')?.value.trim() || '';
+  data.spouseDob = $('spouseDob')?.value || '';
+  data.spouseGender = $('spouseGender')?.value || '';
+  data.spouseCountry = $('spouseCountry')?.value.trim() || '';
+  // Convert children list into array
+  const nKids = parseInt($('children').value||'0',10) || 0;
+  const kids = [];
+  for(let i=0;i<nKids;i++){
+    kids.push({
+      name: $('chName'+i)?.value.trim() || '',
+      dob: $('chDob'+i)?.value || '',
+      gender: $('chGender'+i)?.value || '',
+      country: $('chCountry'+i)?.value.trim() || ''
+    });
+  }
+  data.children = kids;
+  // Flatten children into a JSON string for easier storage in a single cell
+  data.childrenJSON = JSON.stringify(kids);
+  // Attach signature data as a PNG DataURI
+  try { data.sigData = sigCanvas.toDataURL('image/png'); } catch(err) { data.sigData = ''; }
+  // Attach photo data as JPEG DataURI if processed
+  // Attach processed photo data (DataURI string) if available
+  if (window.processedPhotoData) {
+    data.photoData = window.processedPhotoData;
+    data.photoFixed = true;
+  } else {
+    data.photoData = '';
+    data.photoFixed = false;
+  }
+  return data;
+}
+function generateTrackID(){ const d=new Date(), y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), dd=('0'+d.getDate()).slice(-2); const r=Math.floor(Math.random()*9000)+1000; return `DV27-ALH-${y}${m}${dd}-${r}`; }
+function buildCardLink(trackId){ try{ const u=new URL(window.location.href); u.searchParams.set('track',trackId); return u.toString(); } catch(e){ return window.location.href+'#'+trackId; } }
+// download PDF for client card
+$('ccPdfBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  const opt={filename:'DV27-ClientCard.pdf',margin:8,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+  html2pdf().set(opt).from($('clientCard')).save();
+});
+// open card link
+$('ccOpenBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.open(buildCardLink($('ccTrack').textContent), '_blank');
+});
+// success modal close
+$('succClose').addEventListener('click', () => {
+  hide($('successOverlay'));
+  // Clear saved form data so the next visit starts fresh
+  clearFormData();
+});
+// no additional code for succOpenCard
+
+/* ***** ======= Signature Pad ======= ***** */
+const sigCanvas=$('sig'); const sigCtx=sigCanvas.getContext('2d');
+function fitCanvas(){ if(!sigCanvas) return; const rect=sigCanvas.getBoundingClientRect(); const ratio=window.devicePixelRatio||1; sigCanvas.width=Math.floor(rect.width*ratio); sigCanvas.height=Math.floor(180*ratio); sigCtx.scale(ratio,ratio); sigCtx.fillStyle='#ffffff'; sigCtx.fillRect(0,0,rect.width,180); }
+window.addEventListener('resize', fitCanvas, {passive:true}); fitCanvas();
+let drawing=false, lastX=0, lastY=0; if(sigCanvas){ sigCanvas.addEventListener('mousedown',e=>{drawing=true; [lastX,lastY]=[e.offsetX,e.offsetY];}); sigCanvas.addEventListener('mousemove',e=>{ if(!drawing) return; sigCtx.strokeStyle='#111'; sigCtx.lineWidth=2.5; sigCtx.lineCap='round'; sigCtx.beginPath(); sigCtx.moveTo(lastX,lastY); sigCtx.lineTo(e.offsetX,e.offsetY); sigCtx.stroke(); [lastX,lastY]=[e.offsetX,e.offsetY];}); ['mouseup','mouseleave'].forEach(ev=>sigCanvas.addEventListener(ev,()=>drawing=false)); }
+$('clearSig').onclick=()=>{ fitCanvas(); };
+
+/* ***** ======= Tracker (real data via Apps Script) ======= */
+$('lookupBtn').addEventListener('click', lookupCase);
+$('resetTrackerBtn').addEventListener('click', resetTracker);
+async function lookupCase(){
+  const method=$('trackMethod').value; const value=$('trackValue').value.trim(); if(!value){ toast('الرجاء إدخال قيمة للبحث.'); return; }
+  $('trackPlaceholder').classList.add('hide'); $('trackCard').classList.add('hide');
+  try {
+    // Build GET URL for lookup. The Apps Script should handle doGet and return JSON.
+    const url = `${LOOKUP_URL}?mode=lookup&by=${encodeURIComponent(method)}&value=${encodeURIComponent(value)}`;
+    const res = await fetch(url, { method: 'GET' });
+    const json = await res.json();
+    if (!json.ok) {
+      $('trackPlaceholder').classList.remove('hide');
+      $('trackPlaceholder').textContent = 'لا توجد نتيجة مطابقة.';
+      return;
+    }
+    // The back-end returns the details at the top level (not nested under result)
+    const r = json;
+    $('trTrack').textContent = r.trackId || '—';
+    $('trName').textContent = r.fullName || '—';
+    $('trStatus').textContent = r.status || '—';
+    $('trStage').textContent = r.stage || '—';
+    $('trDate').textContent = r.submittedUTC ? new Date(r.submittedUTC).toLocaleString() : '—';
+    $('trNotes').textContent = r.notes || '—';
+    // Build timeline if history is provided
+    const tl = $('timeline');
+    tl.innerHTML = '';
+    const hist = r.history || [];
+    if (hist.length) {
+      hist.forEach(h => {
+        const item = document.createElement('div');
+        item.className = 'tl-item';
+        item.innerHTML = `<div style="margin-left:14px"><b>${sanitize(h.stage || '-')}</b><div class="hint">${sanitize(h.status || '')} • ${h.date ? new Date(h.date).toLocaleString() : ''}</div></div>`;
+        tl.appendChild(item);
+      });
+    }
+    $('trackCard').classList.remove('hide');
+  } catch (e) {
+    console.warn(e);
+    $('trackPlaceholder').classList.remove('hide');
+    $('trackPlaceholder').textContent = 'حدث خطأ أثناء البحث.';
+  }
+}
+function resetTracker(){ $('trackValue').value=''; $('trackCard').classList.add('hide'); $('trackPlaceholder').classList.remove('hide'); $('trackPlaceholder').textContent = 'ستظهر نتيجة البحث هنا…'; }
+</script>
+</body>
+</html>
